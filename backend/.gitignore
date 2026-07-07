@@ -1,0 +1,38 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+
+# Go test
+*.test
+*.coverprofile
+coverage.out
+
+# Build directories
+bin/
+dist/
+build/
+
+# Vendor (ignore only if you don't commit dependencies)
+vendor/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
