@@ -25,10 +25,23 @@ func TestFeatures(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	// Change working directory to features/ so godog finds .feature files
-	// when running `go test ./features/...`
-	if wd, err := os.Getwd(); err == nil {
-		_ = wd // already in the right directory when running from backend/
+	// Ensure a .env file exists for config.Load() calls in BDD steps.
+	// In CI there is no .env file; godotenv.Load() would fail without one.
+	// We create a temporary empty .env in the backend/ directory (parent of
+	// features/) and clean it up after all tests finish.
+	envPath := "../.env"
+	created := false
+	if _, err := os.Stat(envPath); err != nil {
+		if f, err := os.Create(envPath); err == nil {
+			f.Close()
+			created = true
+		}
 	}
-	m.Run()
+
+	code := m.Run()
+
+	if created {
+		os.Remove(envPath)
+	}
+	os.Exit(code)
 }
