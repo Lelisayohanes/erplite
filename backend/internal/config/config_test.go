@@ -37,7 +37,8 @@ func resetViper(t *testing.T) {
 }
 
 // ensureDotEnv creates a temporary empty .env if one doesn't exist,
-// so that godotenv.Load() succeeds in tests. It restores the original after.
+// so that godotenv.Load() succeeds in CI where no .env is present.
+// It restores the original after the test.
 func ensureDotEnv(t *testing.T) {
 	t.Helper()
 	if _, err := os.Stat(".env"); err != nil {

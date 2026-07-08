@@ -14,6 +14,20 @@ jobs:
       run:
         working-directory: backend
 
+    env:
+      ERPLITE_APP_NAME: ${{ secrets.ERPLITE_APP_NAME }}
+      ERPLITE_APP_ENV: ${{ secrets.ERPLITE_APP_ENV }}
+      ERPLITE_APP_PORT: ${{ secrets.ERPLITE_APP_PORT }}
+      ERPLITE_APP_DEBUG: ${{ secrets.ERPLITE_APP_DEBUG }}
+      ERPLITE_APP_TIMEOUT: ${{ secrets.ERPLITE_APP_TIMEOUT }}
+      ERPLITE_APP_LOGFORMAT: ${{ secrets.ERPLITE_APP_LOGFORMAT }}
+      ERPLITE_DATABASE_HOST: ${{ secrets.ERPLITE_DATABASE_HOST }}
+      ERPLITE_DATABASE_PORT: ${{ secrets.ERPLITE_DATABASE_PORT }}
+      ERPLITE_DATABASE_USER: ${{ secrets.ERPLITE_DATABASE_USER }}
+      ERPLITE_DATABASE_PASSWORD: ${{ secrets.ERPLITE_DATABASE_PASSWORD }}
+      ERPLITE_DATABASE_DBNAME: ${{ secrets.ERPLITE_DATABASE_DBNAME }}
+      ERPLITE_DATABASE_SSLMODE: ${{ secrets.ERPLITE_DATABASE_SSLMODE }}
+
     steps:
       - uses: actions/checkout@v4
 
