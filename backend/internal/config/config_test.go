@@ -36,21 +36,9 @@ func resetViper(t *testing.T) {
 	viper.Reset()
 }
 
-// ensureDotEnv creates a temporary empty .env if one doesn't exist,
-// so that godotenv.Load() succeeds in CI where no .env is present.
-// It restores the original after the test.
-func ensureDotEnv(t *testing.T) {
-	t.Helper()
-	if _, err := os.Stat(".env"); err != nil {
-		os.WriteFile(".env", []byte{}, 0o644)
-		t.Cleanup(func() { os.Remove(".env") })
-	}
-}
-
 func TestLoad_Success(t *testing.T) {
 	resetViper(t)
 	setAllEnv(t)
-	ensureDotEnv(t)
 
 	cfg, err := Load()
 	if err != nil {
@@ -82,7 +70,6 @@ func TestLoad_MissingRequired(t *testing.T) {
 	} {
 		os.Unsetenv(key)
 	}
-	ensureDotEnv(t)
 
 	_, err := Load()
 	if err == nil {
@@ -96,7 +83,6 @@ func TestLoad_MissingRequired(t *testing.T) {
 func TestLoad_EnvOverridesDotEnv(t *testing.T) {
 	resetViper(t)
 	setAllEnv(t)
-	ensureDotEnv(t)
 	// Override with env var — should win
 	t.Setenv("ERPLITE_APP_PORT", "7777")
 

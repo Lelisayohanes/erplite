@@ -1,11 +1,12 @@
 package config
 
 import (
+	"bufio"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
@@ -25,7 +26,7 @@ func (c *Config) DSN() string {
 // Supported sources (highest → lowest precedence):
 //
 //  1. Environment variables (prefixed with ERPLITE_, e.g. ERPLITE_DATABASE_HOST)
-//  2. .env file (loaded by godotenv; does NOT overwrite existing env vars)
+//  2. .env file (read by viper; does NOT overwrite existing env vars)
 type Config struct {
 	App      AppConfig
 	Database DatabaseConfig
@@ -55,13 +56,6 @@ type DatabaseConfig struct {
 // required value must be supplied via the .env file or environment
 // variables.  Returns an error if any required value is missing.
 func Load() (*Config, error) {
-	// ── Layer 2: .env file ───────────────────────────────────────────
-	// Loads key=value pairs into the process environment.
-	// Existing env vars are NOT overwritten by godotenv.
-	if err := godotenv.Load(); err != nil {
-		return nil, fmt.Errorf("config: failed to load .env file: %w", err)
-	}
-
 	// ── Layer 1: Environment variables (highest precedence) ──────────
 	viper.SetEnvPrefix("ERPLITE")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -74,6 +68,11 @@ func Load() (*Config, error) {
 			return nil, fmt.Errorf("config: failed to bind key %q: %w", key, err)
 		}
 	}
+
+	// ── Layer 2: .env file (lowest precedence) ───────────────────────
+	// Reads .env natively via viper.  Values are set as defaults so that
+	// real environment variables (Layer 1) always take precedence.
+	loadDotEnvDefaults()
 
 	// Unmarshal into struct
 	var cfg Config
@@ -94,6 +93,36 @@ func Load() (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+// loadDotEnvDefaults reads the .env file and registers each value as a
+// viper default.  Because defaults have the lowest precedence, real
+// environment variables (bound via BindEnv) always win.
+// The .env file is optional — if it doesn't exist, this is a no-op.
+func loadDotEnvDefaults() {
+	f, err := os.Open(".env")
+	if err != nil {
+		return // .env is optional; skip silently
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		key, value, ok := strings.Cut(line, "=")
+		if !ok {
+			continue
+		}
+		// Convert ERPLITE_APP_PORT → app.port so viper's key hierarchy
+		// matches the Config struct used by Unmarshal.
+		k := strings.TrimPrefix(key, "ERPLITE_")
+		k = strings.ToLower(k)
+		k = strings.ReplaceAll(k, "_", ".")
+		viper.SetDefault(k, value)
+	}
 }
 
 // allKeys lists every configuration key the application requires.

@@ -25,23 +25,32 @@ func TestFeatures(t *testing.T) {
 }
 
 func TestMain(m *testing.M) {
-	// Ensure a .env file exists for config.Load() calls in BDD steps.
-	// In CI there is no .env file; godotenv.Load() would fail without one.
-	// We create a temporary empty .env in the backend/ directory (parent of
-	// features/) and clean it up after all tests finish.
-	envPath := "../.env"
-	created := false
-	if _, err := os.Stat(envPath); err != nil {
-		if f, err := os.Create(envPath); err == nil {
-			f.Close()
-			created = true
+	// Set required env vars for BDD steps that call config.Load().
+	// In CI these would come from GitHub Actions secrets; here we provide
+	// safe test defaults so scenarios can exercise the real config loader.
+	// Viper reads the .env file natively (optional), and real env vars
+	// always take precedence.
+	testEnv := map[string]string{
+		"ERPLITE_APP_NAME":          "erplite",
+		"ERPLITE_APP_ENV":           "test",
+		"ERPLITE_APP_PORT":          "8080",
+		"ERPLITE_APP_DEBUG":         "true",
+		"ERPLITE_APP_TIMEOUT":       "30s",
+		"ERPLITE_APP_LOGFORMAT":     "text",
+		"ERPLITE_DATABASE_HOST":     "localhost",
+		"ERPLITE_DATABASE_PORT":     "5432",
+		"ERPLITE_DATABASE_USER":     "postgres",
+		"ERPLITE_DATABASE_PASSWORD": "postgres",
+		"ERPLITE_DATABASE_DBNAME":   "erplite",
+		"ERPLITE_DATABASE_SSLMODE":  "disable",
+	}
+	for k, v := range testEnv {
+		if os.Getenv(k) == "" {
+			os.Setenv(k, v)
 		}
 	}
 
 	code := m.Run()
 
-	if created {
-		os.Remove(envPath)
-	}
 	os.Exit(code)
 }
