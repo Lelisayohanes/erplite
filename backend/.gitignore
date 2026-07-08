@@ -29,7 +29,9 @@ Thumbs.db
 
 # Environment variables
 .env
-.env.*
+.env.local
+.env.*.local
+!.env.example
 
 # Logs
 *.log
