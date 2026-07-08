@@ -6,13 +6,18 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - ERPLITE_APP_NAME=erplite
+      - ERPLITE_APP_ENV=development
       - ERPLITE_APP_PORT=8080
+      - ERPLITE_APP_DEBUG=true
+      - ERPLITE_APP_TIMEOUT=30s
+      - ERPLITE_APP_LOGFORMAT=text
       - ERPLITE_DATABASE_HOST=db          # service name resolves inside Docker
       - ERPLITE_DATABASE_PORT=5432        # internal container port
       - ERPLITE_DATABASE_USER=postgres
-      - ERPLITE_DATABASE_PASSWORD=postgres
+      - ERPLITE_DATABASE_PASSWORD=${ERPLITE_DATABASE_PASSWORD}
       - ERPLITE_DATABASE_DBNAME=erplite
-      - ERPLITE_APP_DEBUG=true
+      - ERPLITE_DATABASE_SSLMODE=disable
     volumes:
       - .:/app                    # mount code for live reload
       - /app/tmp                  # keep tmp inside container
@@ -25,7 +30,7 @@ services:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${ERPLITE_DATABASE_PASSWORD}
       POSTGRES_DB: erplite
     ports:
       - "5433:5432"               # host:container – host uses 5433 to avoid conflict

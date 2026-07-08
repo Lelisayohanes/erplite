@@ -3,14 +3,14 @@ package db
 import (
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func RunMigrations(dsn string, direction string, steps int) error {
+func RunMigrations(dsn string, direction string, steps int, log *slog.Logger) error {
 	m, err := migrate.New("file://migrations", dsn)
 	if err != nil {
 		return fmt.Errorf("migration init failed: %w", err)
@@ -37,6 +37,6 @@ func RunMigrations(dsn string, direction string, steps int) error {
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
-	log.Println("Migration applied successfully")
+	log.Info("migrations applied successfully")
 	return nil
 }

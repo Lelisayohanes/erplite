@@ -9,6 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+// DSN builds a PostgreSQL connection string from the database config.
+func (c *Config) DSN() string {
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		c.Database.User, c.Database.Password,
+		c.Database.Host, c.Database.Port,
+		c.Database.DBName, c.Database.SSLMode)
+}
+
 // Config holds all application configuration.
 // All required values must be provided via the .env file or environment
 // variables.  There are no built-in defaults — the application will
@@ -25,11 +33,12 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name    string
-	Env     string
-	Port    string
-	Debug   bool
-	Timeout time.Duration
+	Name      string
+	Env       string
+	Port      string
+	Debug     bool
+	Timeout   time.Duration
+	LogFormat string
 }
 
 type DatabaseConfig struct {
@@ -94,6 +103,7 @@ var allKeys = []string{
 	"app.port",
 	"app.debug",
 	"app.timeout",
+	"app.logformat",
 	"database.host",
 	"database.port",
 	"database.user",
@@ -115,6 +125,9 @@ func (c *Config) Validate() error {
 	}
 	if c.App.Port == "" {
 		missing = append(missing, "app.port (ERPLITE_APP_PORT)")
+	}
+	if c.App.LogFormat == "" {
+		missing = append(missing, "app.logformat (ERPLITE_APP_LOGFORMAT)")
 	}
 	if c.Database.Host == "" {
 		missing = append(missing, "database.host (ERPLITE_DATABASE_HOST)")
