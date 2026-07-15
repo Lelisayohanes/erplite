@@ -1,19 +1,23 @@
 package main
 
 import (
-	"net/http"
+	"log"
 
-	"github.com/labstack/echo/v5"
+	"github.com/Lelisayohanes/erplite/backend/internal/app"
+	"github.com/Lelisayohanes/erplite/backend/internal/shared/config"
 )
 
 func main() {
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	e := echo.New()
-	e.GET("/ping", func(c *echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"message": "pong",
-		})
-	})
-	e.Start(":8080")
+	application := app.New(cfg)
 
+	addr := cfg.Server.Host + ":" + cfg.Server.Port
+
+	if err := application.Echo.Start(addr); err != nil {
+		log.Fatal(err)
+	}
 }
