@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -15,10 +17,14 @@ type ServerConfig struct {
 }
 
 func Load() (*Config, error) {
+	// Load .env if it exists.
+	// Ignore the error because production environments may not use a .env file.
+	_ = godotenv.Load()
+
 	cfg := &Config{
 		Server: ServerConfig{
-			Host: getEnv("SERVER_HOST", "0.0.0.0"),
-			Port: getEnv("SERVER_PORT", "8080"),
+			Host: getEnv("SERVER_HOST"),
+			Port: getEnv("SERVER_PORT"),
 		},
 	}
 
@@ -30,17 +36,15 @@ func Load() (*Config, error) {
 }
 
 func (c *Config) validate() error {
-	if c.Server.Port == "" {
-		return fmt.Errorf("server port is required")
+	if c.Server.Host == "" {
+		return fmt.Errorf("SERVER_HOST environment variable is required")
 	}
-
+	if c.Server.Port == "" {
+		return fmt.Errorf("SERVER_PORT environment variable is required")
+	}
 	return nil
 }
 
-func getEnv(key, fallback string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return fallback
-	}
-	return value
+func getEnv(key string) string {
+	return os.Getenv(key)
 }

@@ -15,9 +15,7 @@ func main() {
 
 	application := app.New(cfg)
 
-	addr := cfg.Server.Host + ":" + cfg.Server.Port
-
-	if err := application.Echo.Start(addr); err != nil {
+	if err := application.Run(); err != nil {
 		log.Fatal(err)
 	}
 }

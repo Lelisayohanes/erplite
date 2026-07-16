@@ -7,13 +7,13 @@ import (
 )
 
 func (a *App) registerRoutes() {
-	a.Echo.GET("/ping", ping)
+	a.server.GET("/ping", ping)
 
-	a.Echo.GET("/health", health)
+	a.server.GET("/health", health)
 
-	a.Echo.GET("/ready", ready)
+	a.server.GET("/ready", ready)
 
-	a.Echo.GET("/live", live)
+	a.server.GET("/live", live)
 }
 
 func ping(c *echo.Context) error {
