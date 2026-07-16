@@ -1,30 +1,35 @@
 package app
 
 import (
+	"net/http"
+
 	"github.com/Lelisayohanes/erplite/backend/internal/shared/config"
 	"github.com/labstack/echo/v5"
 )
 
 type App struct {
-	server *echo.Echo
-	cfg    *config.Config
+	echoServer *echo.Echo
+	cfg        *config.Config
+	httpServer *http.Server
 }
 
 func New(cfg *config.Config) *App {
+
 	e := echo.New()
 
 	app := &App{
-		server: e,
-		cfg:    cfg,
+		echoServer: e,
+		cfg:        cfg,
 	}
 
 	app.registerMiddleware()
 	app.registerRoutes()
+	app.createHTTPServer()
 
 	return app
 }
 
-func (a *App) Run() error {
-	addr := a.cfg.Server.Host + ":" + a.cfg.Server.Port
-	return a.server.Start(addr)
+// Handler exposes the HTTP handler for testing.
+func (a *App) Handler() http.Handler {
+	return a.echoServer
 }
